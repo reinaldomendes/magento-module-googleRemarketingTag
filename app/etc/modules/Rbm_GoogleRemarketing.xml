@@ -30,7 +30,7 @@
         <Rbm_GoogleRemarketing>
             <active>true</active>
             <codePool>community</codePool>
-            <depends>                
+            <depends>
                 <Mage_Catalog/>
                 <Mage_Core/>
             </depends>

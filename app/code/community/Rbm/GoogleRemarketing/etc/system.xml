@@ -6,25 +6,26 @@
             <sort_order>410</sort_order>
         </rbm>
     </tabs>
-    <section>
-      <rbmGoogleRemarketing>
-          <tab>rbm</tab>
-            <label>Google Remarketing</label>
+    <sections>
+        <rbmGoogleRemarketing translate="label" module="rbmGoogleRemarketing">
+            <tab>rbm</tab>
+            <label>Google Adword Remarketing Tag</label>
             <frontend_type>text</frontend_type>
-            <sort_order>99999999999</sort_order>
+            <sort_order>200</sort_order>
             <show_in_default>1</show_in_default>
             <show_in_website>1</show_in_website>
             <show_in_store>1</show_in_store>
             <groups>
-              <cfg>
-                <label>Config</label>
+                <config>
+                    <label>Configurations</label>
                     <frontend_type>text</frontend_type>
                     <sort_order>9</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
+                    <expanded>1</expanded>
                     <fields>
-                      <enabled translate="label">
+                        <enabled>
                             <label>Enabled</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
@@ -33,9 +34,120 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </enabled>
+                        <conversion_id>
+                            <label>Conversion Id</label>
+                            <frontend_type>text</frontend_type>
+                            <depends>
+                                <enabled>1</enabled>
+                            </depends>
+                            <comment><![CDATA[Please enter a valid number]]></comment>
+                            <validate>required-entry</validate>
+                            <validate>validate-number</validate>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </conversion_id>
+                        
+                        
+
                     </fields>
-              </cfg>
+                </config>
+                <ecomm_page_type>
+                    <label>Page types</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>9</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <expanded>1</expanded>
+                    <comment><![CDATA[Page type paths<br/> '*' wildcard is permited]]></comment>
+                    <fields>
+                        <useHomeCustom>
+                            <label>Use custom home page</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </useHomeCustom>
+                        <homeCustomPath>
+                            <label>Home Page Path</label>
+                            <frontend_type>text</frontend_type>
+                            <depends>
+                                <useHomeCustom>1</useHomeCustom>
+                            </depends>
+                            <sort_order>11</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </homeCustomPath>
+                        <useSearchResultsCustom>
+                            <label>Use custom search page</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </useSearchResultsCustom>
+                        <searchResultsCustomPath>
+                            <label>Search Result Custom Path</label>
+                            <frontend_type>text</frontend_type>
+                            <depends>
+                                <useSearchResultsCustom>1</useSearchResultsCustom>
+                            </depends>
+                            <sort_order>21</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </searchResultsCustomPath>
+                        
+                         <useCartCustom>
+                            <label>Use custom cart page</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </useCartCustom>
+                        <cartCustomPath>
+                            <label>Search Result Page</label>
+                            <frontend_type>text</frontend_type>
+                            <depends>
+                                <useCartCustom>1</useCartCustom>
+                            </depends>
+                            <sort_order>31</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </cartCustomPath>
+                        
+                         <usePurchaseCustom>
+                            <label>Use custom success page (Purchase)</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </usePurchaseCustom>
+                        <purchaseCustomPath>
+                            <label>Search Result Page</label>
+                            <frontend_type>text</frontend_type>
+                            <depends>
+                                <usePurchaseCustom>1</usePurchaseCustom>
+                            </depends>
+                            <sort_order>31</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </purchaseCustomPath>
+                    </fields>
+                </ecomm_page_type>
             </groups>
-      </rbmGoogleRemarketing>
-    </section>
-  </config>
+        </rbmGoogleRemarketing>
+    </sections>
+</config>
