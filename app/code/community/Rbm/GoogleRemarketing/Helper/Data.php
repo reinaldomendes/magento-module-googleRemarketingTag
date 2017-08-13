@@ -109,7 +109,7 @@ class Rbm_GoogleRemarketing_Helper_Data extends Mage_Core_Helper_Abstract
         }
         
          if ($this->isHomePage()) {
-            return 'homepage';
+            return 'home';
         }
         return 'other'; //default return type
     }
