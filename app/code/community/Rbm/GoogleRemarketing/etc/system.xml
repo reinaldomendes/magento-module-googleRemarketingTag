@@ -49,19 +49,46 @@
                             <show_in_store>1</show_in_store>
                         </conversion_id>
                         
-                        
+                        <product_identifier>
+                            <label>Product Identifier</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>rbmGoogleRemarketing/system_config_source_productIdentifier</source_model>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </product_identifier>
 
                     </fields>
                 </config>
                 <ecomm_page_type>
                     <label>Page types</label>
                     <frontend_type>text</frontend_type>
-                    <sort_order>9</sort_order>
+                    <sort_order>20</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
                     <expanded>1</expanded>
-                    <comment><![CDATA[Page type paths<br/> '*' wildcard is permited]]></comment>
+                    <comment><![CDATA[<p style='color:#c00'>
+                            Page type paths. 
+                            <strong>*</strong> wildcard is permited . 
+                            <br/>
+                            Only use if you have custom paths on magento, like a custom search etc...
+                            <br/>
+                            Ex: <br/>
+                            <ul style='text-indent:15px; color:#c00;'> 
+                                <li>
+                                    home : /home/ 
+                                </li>
+                                <li>
+                                    catalogSearch: /catalog/search/results/*
+                                </li>
+                                <li>
+                                    checkoutCart: /custom/cart/*
+                                </li>
+                            </ul>
+                        </p>
+                        ]]></comment>
                     <fields>
                         <useHomeCustom>
                             <label>Use custom home page</label>
@@ -129,7 +156,7 @@
                             <label>Use custom success page (Purchase)</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>30</sort_order>
+                            <sort_order>40</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -140,7 +167,7 @@
                             <depends>
                                 <usePurchaseCustom>1</usePurchaseCustom>
                             </depends>
-                            <sort_order>31</sort_order>
+                            <sort_order>41</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>

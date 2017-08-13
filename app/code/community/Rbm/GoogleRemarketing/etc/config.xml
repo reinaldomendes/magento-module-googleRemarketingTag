@@ -30,15 +30,39 @@
             </rbmGoogleRemarketing>
         </helpers>
     </global>
+    <frontend>
+        <events>
+            <sales_model_service_quote_submit_success>
+                <observers>
+                    <rbm_googleRemarketing_quote_submit_success>
+                        <type>singleton</type>
+                        <class>rbmGoogleRemarketing/Observer</class>
+                        <method>quoteSubmitSuccess</method>
+                    </rbm_googleRemarketing_quote_submit_success>
+                </observers>
+            </sales_model_service_quote_submit_success>
+        </events>
+    </frontend>
     <default>
         <rbmGoogleRemarketing>
+            <config>
+                <product_identifier>id</product_identifier>
+            </config>
             <ecomm_page_type>
-                <homeCustomPath><![CDATA[/]]></homeCustomPath>
-                <searchResultsCustomPath><![CDATA[/catalogsearch/result/*]]></searchResultsCustomPath>
-                <cartCustomPath><![CDATA[/checkout/cart/*]]></cartCustomPath>
-                <purchaseCustomPath><![CDATA[/checkout/onepage/success]]></purchaseCustomPath>
+                <homeCustomPath>
+                    <![CDATA[/]]>
+                </homeCustomPath>
+                <searchResultsCustomPath>
+                    <![CDATA[/catalogsearch/result/*]]>
+                </searchResultsCustomPath>
+                <cartCustomPath>
+                    <![CDATA[/checkout/cart/*]]>
+                </cartCustomPath>
+                <purchaseCustomPath>
+                    <![CDATA[/checkout/onepage/success]]>
+                </purchaseCustomPath>
             </ecomm_page_type>
         </rbmGoogleRemarketing>
-        
+
     </default>
 </config>

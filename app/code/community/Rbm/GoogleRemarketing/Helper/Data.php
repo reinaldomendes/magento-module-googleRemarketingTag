@@ -18,6 +18,12 @@ class Rbm_GoogleRemarketing_Helper_Data extends Mage_Core_Helper_Abstract
      * @const string 'conversion_id' config path
      */
     const XML_CONFIG_CONVERSION_ID = 'rbmGoogleRemarketing/config/conversion_id';
+    
+    /**
+     *
+     * @var Mage_Sales_Model_Order
+     */
+    protected $_currentOrder = null;
 
     /**
      *
@@ -67,28 +73,125 @@ class Rbm_GoogleRemarketing_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getEcommPageType()
     {
-        
-        if($this->isCategoryViewPage()){
+
+        if ($this->isCategoryViewPage()) {
             return 'category';
         }
-        if($this->isProductViewPage()){
+        if ($this->isProductViewPage()) {
             return 'product';
-        }        
-        
-        if($this->isHomePage()){
+        }
+
+        if ($this->isHomePage()) {
             return 'homepage';
         }
-        
-        if($this->isSearchResultsPage()){
+
+        if ($this->isSearchResultsPage()) {
             return 'searchresults';
-        }        
-        if($this->isCartPage()){
+        }
+        if ($this->isCartPage()) {
             return 'cart';
-        }        
-        if($this->isPurchasePage()){
+        }
+        if ($this->isPurchasePage()) {
             return 'purchase';
-        }        
+        }
         return 'other'; //default return type
+    }
+
+    /**
+     * Required. This is the product ID of the product or products displayed on the current page - the IDs used here should match the IDs in your GMC feed.
+     * 
+     * This parameter should be passed when the ecomm_pagetype is product or cart. On product pages you will generally have a single product and so a simple single literal value can be passed; on cart pages if there is more than one product shown (i.e. if the user has more than one product in their cart) then an array of values can be passed. 
+     * 
+     * Both numeric and alphanumeric values are supported, for example 34592212, '23423-131-12', or 'gp232123-19a', please note that if your product ID is anything other than a number, then you will need to treat it as a string and surround it in quotes.
+     *      
+     * Example usage on a single product page:
+     * <code>
+     * var google_tag_params = { 
+     *     ecomm_prodid: 34592212
+     * };
+     * </code>
+     * 
+     * Example usage on a cart page with more than on product
+     * <code> 
+     * var google_tag_params = { 
+     *     ecomm_prodid: [34592212, '23423-131-12', 'gp232123-19a']
+     * };
+     * </code>
+     * 
+     * @return array|string|null
+     */
+    public function getEcommProdId()
+    {
+        if ($this->isCartPage()) {
+            $quote = $this->_getQuote();
+            /* @var $quote Mage_Sales_Model_Quote */
+            $result = [];
+            foreach ($quote->getAllVisibleItems() as $item) {
+                $result[] = $this->_getItemIdentifier($item);
+            }
+            return $result;
+        }
+        if($this->isPurchasePage()){
+            $result = [];
+            $order = $this->getCurrentOrder();
+            foreach ($order->getAllVisibleItems() as $item) {
+                $result[] = $this->_getItemIdentifier($item);
+            }
+            return $result;
+        }
+        if ($this->isProductViewPage()) {
+            $currentProduct = Mage::registry('current_product');
+            return $this->_getProductIdentifier($currentProduct);
+        }     
+    }
+    
+    /**
+     * 
+     * @return array|string|float|null
+     */
+    public function getEcommTotalvalue(){
+        if ($this->isCartPage()) {
+            $quote = $this->_getQuote();
+            /* @var $quote Mage_Sales_Model_Quote */
+            $result = [];
+            foreach ($quote->getAllVisibleItems() as $item) {
+                /*@var $item Mage_Sales_Model_Quote_Item*/
+                $result[] = $item->getPriceInclTax();
+            }
+            return $result;
+        }
+        if($this->isPurchasePage()){
+            $result = [];
+            $order = $this->getCurrentOrder();
+            foreach ($order->getAllVisibleItems() as $item) {
+                 /*@var $item Mage_Sales_Model_Order_Item*/
+                $result[] = $item->getPriceInclTax();
+            }
+            return $result;
+        }        
+        if ($this->isProductViewPage()) {
+            $currentProduct = Mage::registry('current_product');
+            return $this->_getProductIdentifier($currentProduct);
+        }        
+    }
+    
+    /**
+     * @see Rbm_GoogleRemarketing_Model_Observer::quoteSubmitSuccess
+     * @param Mage_Sales_Model_Order $order
+     * @return \Rbm_GoogleRemarketing_Helper_Data
+     */
+    public function setCurrentOrder(Mage_Sales_Model_Order $order){
+        $this->_currentOrder = $order;
+        return $this;
+    }
+    
+     
+    /**
+     * @see Rbm_GoogleRemarketing_Model_Observer::quoteSubmitSuccess
+     * @return Mage_Sales_Model_Order
+     */
+    public function getCurrentOrder(){
+        return $this->_currentOrder;
     }
 
     /**
@@ -101,8 +204,10 @@ class Rbm_GoogleRemarketing_Helper_Data extends Mage_Core_Helper_Abstract
         $configCustom = 'homeCustomPath';
         $defaultComparePath = '/';
 
-        return $this->_isPageByPath($flagUseCustom, $configCustom, $defaultComparePath);
+        return $this->_isPageByPath($flagUseCustom, $configCustom,
+                        $defaultComparePath);
     }
+
     /**
      * is searchResults page?
      * @return bool
@@ -113,10 +218,11 @@ class Rbm_GoogleRemarketing_Helper_Data extends Mage_Core_Helper_Abstract
         $configCustom = 'searchResultsCustomPath';
         $defaultComparePath = '/catalogsearch/result*';
 
-        return $this->_isPageByPath($flagUseCustom, $configCustom, $defaultComparePath);
+        return $this->_isPageByPath($flagUseCustom, $configCustom,
+                        $defaultComparePath);
     }
-    
-     /**
+
+    /**
      * is cart page?
      * @return bool
      */
@@ -126,10 +232,11 @@ class Rbm_GoogleRemarketing_Helper_Data extends Mage_Core_Helper_Abstract
         $configCustom = 'cartCustomPath';
         $defaultComparePath = '/checkout/cart*';
 
-        return $this->_isPageByPath($flagUseCustom, $configCustom, $defaultComparePath);
+        return $this->_isPageByPath($flagUseCustom, $configCustom,
+                        $defaultComparePath);
     }
-    
-      /**
+
+    /**
      * is cart page?
      * @return bool
      */
@@ -139,52 +246,60 @@ class Rbm_GoogleRemarketing_Helper_Data extends Mage_Core_Helper_Abstract
         $configCustom = 'purchaseCustomPath';
         $defaultComparePath = '/checkout/onepage/success';
 
-        return $this->_isPageByPath($flagUseCustom, $configCustom, $defaultComparePath);
+        return $this->_isPageByPath($flagUseCustom, $configCustom,
+                        $defaultComparePath);
     }
-    
-    
-     /**
+
+    /**
      * is catalogCategory page?
      * @return bool
      */
-    public function isCategoryViewPage(){
+    public function isCategoryViewPage()
+    {
         $request = Mage::app()->getRequest();
-        return $request->getModuleName() == 'catalog' 
+        return $request->getModuleName() == 'catalog'
                 && $request->getControllerName() == 'category'
                 && $request->getActionName() == 'view';
-                
     }
-    
-      /**
+
+    /**
      * is product view page?
      * @return bool
      */
-    public function isProductViewPage(){
+    public function isProductViewPage()
+    {
         $request = Mage::app()->getRequest();
-        return $request->getModuleName() == 'catalog' 
+        return $request->getModuleName() == 'catalog'
                 && $request->getControllerName() == 'product'
                 && $request->getActionName() == 'view';
-                
     }
-    
-    
 
+    /**
+     * 
+     * Check if page is the type compared with $pathCompareString or a configured _getEcommTypeConfig($config)?
+     * @param string $flagCustom
+     * @param string $config
+     * @param string $pathCompareString
+     * @return boolean
+     */
     protected function _isPageByPath($flagCustom, $config, $pathCompareString)
     {
         $path = $this->_getRequestPath();
         if ($this->_getEcommTypeConfigFlag($flagCustom)) {
-            $path = $this->_getEcommTypeConfig($config);
+            $pathCompareString = $this->_getEcommTypeConfig($config);
         }
         $regex = $this->_makeRegex($pathCompareString);
-        return preg_match($regex,$path);
+
+        return preg_match($regex, $path);
     }
-    
+
     /**
      * convert string/* => '@^string/.*$@'
      * @param string $pathCompareString
      */
-    protected function _makeRegex($pathCompareString){
-        return '@^'. strtr($pathCompareString,['*' => '.*']) . '$@';
+    protected function _makeRegex($pathCompareString)
+    {
+        return '@^' . strtr($pathCompareString, ['*' => '.*']) . '$@';
     }
 
     /**
@@ -198,20 +313,80 @@ class Rbm_GoogleRemarketing_Helper_Data extends Mage_Core_Helper_Abstract
         $withoutQueryArr = explode('?', $requestUri);
         $requestPath = current($withoutQueryArr);
         $scriptName = $request->getServer('SCRIPT_NAME');
-        $result =  strtr($requestPath, [$scriptName => '/']);
-        return  '/' . ltrim($result,'/');
+        $result = strtr($requestPath, [$scriptName => '/']);
+        return '/' . ltrim($result, '/');
     }
 
+    /**
+     * 
+     * @param string $path - suffix of rbmGoogleRemarketing/ecomm_page_type/ config
+     * @return string
+     */
     protected function _getEcommTypeConfig($path)
     {
-        return Mage::getStoreConfig('rbmGoogleRemarketing/ecomm_page_type/' . ltrim($path,
-                                '/'));
+        $_path = ltrim($path, '/');
+        return Mage::getStoreConfig('rbmGoogleRemarketing/ecomm_page_type/' . $_path);
     }
 
+    /**
+     * 
+     * @param string $path - suffix of rbmGoogleRemarketing/ecomm_page_type/ config
+     * @return boolean
+     */
     protected function _getEcommTypeConfigFlag($path)
     {
-        return Mage::getStoreConfigFlag('rbmGoogleRemarketing/ecomm_page_type/' . ltrim($path,
-                                '/'));
+        $_path = ltrim($path, '/');
+        return Mage::getStoreConfigFlag('rbmGoogleRemarketing/ecomm_page_type/' . $_path);
     }
+    
+    
+
+    protected function _getProductIdentifierName()
+    {
+        return Mage::getStoreConfigFlag('rbmGoogleRemarketing/config/product_identifier' );
+    }
+
+    protected function _getProductIdentifier(Mage_Catalog_Model_Product $product)
+    {
+        $identifier = $this->_getProductIdentifierName();
+        $result = null;
+        switch ($identifier) {
+            case Rbm_GoogleRemarketing_Model_System_Config_Source_ProductIdentifier::PRODUCT_SKU:
+                $result = $product->getSku();
+                break;
+            default:
+                $result = $product->getId();
+                break;
+        }
+        return $result;
+    }
+
+    /**
+     * 
+     * @param Mage_Sales_Model_Quote_Item|Mage_Sales_Model_Order_Item $item
+     * @return null|string|int
+     */
+    protected function _getItemIdentifier( $item)
+    {
+        $identifier = $this->_getProductIdentifierName();
+        $result = null;
+        switch ($identifier) {
+            case Rbm_GoogleRemarketing_Model_System_Config_Source_ProductIdentifier::PRODUCT_SKU:
+                $result = $item->getSku();
+                break;
+            default:
+                $result = $item->getProductId();
+                break;
+        }
+        return $result;
+    }
+    
+    /**
+     * @return Mage_Sales_Model_Quote
+     */
+    protected function _getQuote(){
+        return Mage::getSingleton('checkout/session')->getQuote();
+    }
+   
 
 }
