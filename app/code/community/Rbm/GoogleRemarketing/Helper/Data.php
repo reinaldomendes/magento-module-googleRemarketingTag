@@ -164,8 +164,8 @@ class Rbm_GoogleRemarketing_Helper_Data extends Mage_Core_Helper_Abstract
             /* @var $quote Mage_Sales_Model_Quote */
             $result = [];
             foreach ($quote->getAllVisibleItems() as $item) {
-                /*@var $item Mage_Sales_Model_Quote_Item*/
-                $result[] = $item->getPriceInclTax();
+                /*@var $item Mage_Sales_Model_Quote_Item*/                
+                $result[] = $item->getPriceInclTax() * $item->getQty();
             }
             return array_sum($result);
         }
@@ -174,7 +174,7 @@ class Rbm_GoogleRemarketing_Helper_Data extends Mage_Core_Helper_Abstract
             $order = $this->getCurrentOrder();
             foreach ($order->getAllVisibleItems() as $item) {
                  /*@var $item Mage_Sales_Model_Order_Item*/
-                $result[] = $item->getPriceInclTax();
+                $result[] = $item->getPriceInclTax() * $item->getQty();
             }
             return array_sum($result);
         }        
