@@ -19,6 +19,12 @@ class Rbm_GoogleRemarketing_Helper_Data extends Mage_Core_Helper_Abstract
      */
     const XML_CONFIG_CONVERSION_ID = 'rbmGoogleRemarketing/config/conversion_id';
     
+    
+     /**
+     * @const string 'debug' config path
+     */
+    const XML_CONFIG_DEBUG_IS_ENABLED = 'rbmGoogleRemarketing/config/debug';
+    
     /**
      *
      * @var Mage_Sales_Model_Order
@@ -41,6 +47,13 @@ class Rbm_GoogleRemarketing_Helper_Data extends Mage_Core_Helper_Abstract
     public function getConversionId()
     {
         return Mage::getStoreConfig(self::XML_CONFIG_CONVERSION_ID);
+    }
+    
+    /**
+     * 
+     */
+    public function isDebugEnabled(){
+         return Mage::getStoreConfigFlag(self::XML_CONFIG_DEBUG_IS_ENABLED);
     }
 
     /**
@@ -81,9 +94,7 @@ class Rbm_GoogleRemarketing_Helper_Data extends Mage_Core_Helper_Abstract
             return 'product';
         }
 
-        if ($this->isHomePage()) {
-            return 'homepage';
-        }
+       
 
         if ($this->isSearchResultsPage()) {
             return 'searchresults';
@@ -91,8 +102,14 @@ class Rbm_GoogleRemarketing_Helper_Data extends Mage_Core_Helper_Abstract
         if ($this->isCartPage()) {
             return 'cart';
         }
+        
+        
         if ($this->isPurchasePage()) {
             return 'purchase';
+        }
+        
+         if ($this->isHomePage()) {
+            return 'homepage';
         }
         return 'other'; //default return type
     }
@@ -130,15 +147,7 @@ class Rbm_GoogleRemarketing_Helper_Data extends Mage_Core_Helper_Abstract
                 $result[] = $this->_getItemIdentifier($item);
             }
             return $result;
-        }
-        if($this->isPurchasePage()){
-            $result = [];
-            $order = $this->getCurrentOrder();
-            foreach ($order->getAllVisibleItems() as $item) {
-                $result[] = $this->_getItemIdentifier($item);
-            }
-            return $result;
-        }
+        }        
         if ($this->isProductViewPage()) {
             $currentProduct = Mage::registry('current_product');
             return $this->_getProductIdentifier($currentProduct);
@@ -147,7 +156,7 @@ class Rbm_GoogleRemarketing_Helper_Data extends Mage_Core_Helper_Abstract
     
     /**
      * 
-     * @return array|string|float|null
+     * @return float|null
      */
     public function getEcommTotalvalue(){
         if ($this->isCartPage()) {
@@ -158,7 +167,7 @@ class Rbm_GoogleRemarketing_Helper_Data extends Mage_Core_Helper_Abstract
                 /*@var $item Mage_Sales_Model_Quote_Item*/
                 $result[] = $item->getPriceInclTax();
             }
-            return $result;
+            return array_sum($result);
         }
         if($this->isPurchasePage()){
             $result = [];
@@ -167,13 +176,41 @@ class Rbm_GoogleRemarketing_Helper_Data extends Mage_Core_Helper_Abstract
                  /*@var $item Mage_Sales_Model_Order_Item*/
                 $result[] = $item->getPriceInclTax();
             }
-            return $result;
+            return array_sum($result);
         }        
         if ($this->isProductViewPage()) {
             $currentProduct = Mage::registry('current_product');
-            return $this->_getProductIdentifier($currentProduct);
+            return $this->_getProductPrice($currentProduct);
         }        
     }
+    
+    /**
+     * This parameter contains a string specifying the category of the currently viewed product or category pages. The string can be any value and does not need to conform to any specific naming convention.
+     *
+     *   Example usage for a product on in the "Home & Garden" category
+     * <code>
+     * var google_tag_params = { 
+     *      ecomm_category: 'Home & Garden'
+     *  };
+     * </code>
+     * 
+     * @return string|null
+     */
+    public function getEcommCategory(){
+        
+        if($this->isCategoryViewPage()){
+            return Mage::registry('current_category')->getName();
+        }
+        
+        if($this->isProductViewPage()){        
+            try{
+                return Mage::registry('current_category')->getName();
+            }catch(Exception $e){
+                return;
+            }
+        }
+    }
+    
     
     /**
      * @see Rbm_GoogleRemarketing_Model_Observer::quoteSubmitSuccess
@@ -244,7 +281,7 @@ class Rbm_GoogleRemarketing_Helper_Data extends Mage_Core_Helper_Abstract
     {
         $flagUseCustom = 'usePurchaseCustom';
         $configCustom = 'purchaseCustomPath';
-        $defaultComparePath = '/checkout/onepage/success';
+        $defaultComparePath = '/checkout/onepage/success/';
 
         return $this->_isPageByPath($flagUseCustom, $configCustom,
                         $defaultComparePath);
@@ -342,13 +379,13 @@ class Rbm_GoogleRemarketing_Helper_Data extends Mage_Core_Helper_Abstract
     
 
     protected function _getProductIdentifierName()
-    {
-        return Mage::getStoreConfigFlag('rbmGoogleRemarketing/config/product_identifier' );
+    {        
+        return Mage::getStoreConfig('rbmGoogleRemarketing/config/product_identifier' );
     }
 
     protected function _getProductIdentifier(Mage_Catalog_Model_Product $product)
     {
-        $identifier = $this->_getProductIdentifierName();
+        $identifier = $this->_getProductIdentifierName();        
         $result = null;
         switch ($identifier) {
             case Rbm_GoogleRemarketing_Model_System_Config_Source_ProductIdentifier::PRODUCT_SKU:
@@ -372,10 +409,11 @@ class Rbm_GoogleRemarketing_Helper_Data extends Mage_Core_Helper_Abstract
         $result = null;
         switch ($identifier) {
             case Rbm_GoogleRemarketing_Model_System_Config_Source_ProductIdentifier::PRODUCT_SKU:
-                $result = $item->getSku();
+                $id = $this->_getSuperProductIdByItem($item);
+                $result = Mage::getModel('catalog/product')->load($id)->getSku();                
                 break;
             default:
-                $result = $item->getProductId();
+                $result = $this->_getSuperProductIdByItem($item);
                 break;
         }
         return $result;
@@ -387,6 +425,36 @@ class Rbm_GoogleRemarketing_Helper_Data extends Mage_Core_Helper_Abstract
     protected function _getQuote(){
         return Mage::getSingleton('checkout/session')->getQuote();
     }
+    
+    protected function _getProductPrice(Mage_Catalog_Model_Product $product){     
+        
+        $price = $product->getFinalPrice();            
+        if($product->getTypeId() == 'grouped'){                        
+            $_associatedProducts = $product->getTypeInstance(true)->getAssociatedProducts($product);                
+            $price = null;
+            foreach($_associatedProducts as $_associatedProduct) {
+                if(null  == $price) {
+                    $price = $_associatedProduct->getPrice();
+                }
+                $price = min($price,$_associatedProduct->getPrice());
+            }
+        }
+        return round($price,2);
+    }
+    
+    protected function _getSuperProductIdByItem($item){
+            /*@var $item Mage_Sales_Model_Order_Item|Mage_Sales_Model_Quote_Item*/            
+            $productId = $item->getProductId();
+            $buyRequest = $item->getBuyRequest()->getData();
+            if(isset($buyRequest['super_product_config'])){
+                $productConfig = $buyRequest['super_product_config'];
+                if($productConfig['product_id']){
+                    $productId = $productConfig['product_id'];
+                }
+            } 
+            return $productId;
+    }
+    
    
 
 }

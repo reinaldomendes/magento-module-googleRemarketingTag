@@ -8,10 +8,19 @@ var google_custom_params = window.google_tag_params;
 var google_remarketing_only = true;
 /* ]]> */
 </script>
-<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+<?php if($this->isDebugEnabled()):?>
+    <script type="text/javascript" defer='defer'>
+        setTimeout(function(){
+            console.info('DEBUG:window.google_tag_params')
+            console.info(window.google_tag_params);
+        },3000);
+
+    </script>
+<?php endif;?>
+<script type="text/javascript" defer='defer'  src="//www.googleadservices.com/pagead/conversion.js">
 </script>
 <noscript>
-<div style="display:inline;">
-<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/997608082/?guid=ON&amp;script=0"/>
+    <div style="display:inline;">
+    <img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/<?php echo $this->getConversionId(); ?>/?guid=ON&amp;script=0<?php echo $this->getGoogleTagParamsUri();?>"/>
 </div>
 </noscript>

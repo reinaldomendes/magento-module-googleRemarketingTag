@@ -32,21 +32,36 @@
     </global>
     <frontend>
         <events>
-            <sales_model_service_quote_submit_success>
+            <checkout_onepage_controller_success_action>
                 <observers>
-                    <rbm_googleRemarketing_quote_submit_success>
-                        <type>singleton</type>
-                        <class>rbmGoogleRemarketing/Observer</class>
-                        <method>quoteSubmitSuccess</method>
-                    </rbm_googleRemarketing_quote_submit_success>
+                    <rbm_googleRemarketing_onepage_success>
+                        <class>rbmGoogleRemarketing/observer</class>
+                        <method>setOrderOnSuccessPage</method>
+                    </rbm_googleRemarketing_onepage_success>
                 </observers>
-            </sales_model_service_quote_submit_success>
+            </checkout_onepage_controller_success_action>
+            <checkout_multishipping_controller_success_action>
+                <observers>
+                    <rbm_googleRemarketing_multishipping_success>
+                        <type>singleton</type>
+                        <class>rbmGoogleRemarketing/observer</class>
+                        <method>setOrderOnSuccessPage</method>
+                    </rbm_googleRemarketing_multishipping_success>
+                </observers>
+            </checkout_multishipping_controller_success_action>             
         </events>
+        <layout>
+            <updates>
+                <Rbm_GoogleRemarketing>
+                    <file>rbm-google-remarketing.xml</file>
+                </Rbm_GoogleRemarketing>
+            </updates>
+        </layout>
     </frontend>
     <default>
         <rbmGoogleRemarketing>
             <config>
-                <product_identifier>id</product_identifier>
+                <product_identifier><![CDATA[id]]></product_identifier>
             </config>
             <ecomm_page_type>
                 <homeCustomPath>
@@ -59,7 +74,7 @@
                     <![CDATA[/checkout/cart/*]]>
                 </cartCustomPath>
                 <purchaseCustomPath>
-                    <![CDATA[/checkout/onepage/success]]>
+                    <![CDATA[/checkout/onepage/success/*]]>
                 </purchaseCustomPath>
             </ecomm_page_type>
         </rbmGoogleRemarketing>
