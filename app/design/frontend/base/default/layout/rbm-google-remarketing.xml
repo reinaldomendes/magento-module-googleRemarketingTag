@@ -8,7 +8,7 @@ Default layout, loads most of the pages
 
     <default>
         <!-- Mage_GoogleAnalytics -->
-        <reference name="before_head_end">
+        <reference name="before_body_end">
             <block type="rbmGoogleRemarketing/script" name="google.remarketing.script" as="google_remarketing_script" template="rbm/google-remarketing/script.phtml" />
         </reference>
     </default>
